@@ -25,13 +25,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/api")
-def read_root():
-    return [{"Hello": "World",
-             "api": [{"name": "lol"}]}]
-
-
-
 # Маршруты для выполнения операций CRUD
 
 # Получение всех календарей
@@ -56,12 +49,36 @@ def get_mealtimes(calendar_id: int):
         return calendar.mealtimes
     else:
         return []
+    
+@app.get("/mealtime")
+def get_mealtimes():
+    Session = SessionLocal()
+    mealtime = Session.query(Mealtime).all()
+    return mealtime
 
 # Получение всех приемов пищи для указанного времени приема пищи
+@app.get("/mealtime/{mealtime_id}/")
+def get_mealtimes(mealtime_id: int):
+    Session = SessionLocal()
+    mealtime = Session.query(Mealtime).get(mealtime_id)
+    if mealtime:
+        return mealtime
+    else:
+        return []
+
 @app.get("/mealtime/{mealtime_id}/meal")
 def get_meals(mealtime_id: int):
     Session = SessionLocal()
     mealtime = Session.query(Mealtime).get(mealtime_id)
+    if mealtime:
+        return mealtime.meals
+    else:
+        return []
+    
+@app.get("meal/{meal_id}")
+def get_meals(meal_id: int):
+    Session = SessionLocal()
+    mealtime = Session.query(Mealtime).get(meal_id)
     if mealtime:
         return mealtime.meals
     else:

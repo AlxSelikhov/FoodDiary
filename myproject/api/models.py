@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import create_engine, Column, Date, Integer, String, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -13,7 +13,7 @@ class Calendar(Base):
     __tablename__ = "calendar"
 
     id = Column(Integer, primary_key=True, index=True)
-    calendar_name = Column(String)
+    calendar_name = Column(Date)
 
     mealtimes = relationship("Mealtime", back_populates="calendar")
 
