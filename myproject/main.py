@@ -75,14 +75,20 @@ def get_meals(mealtime_id: int):
     else:
         return []
     
-@app.get("meal/{meal_id}")
+@app.get("/meal/{meal_id}")
 def get_meals(meal_id: int):
     Session = SessionLocal()
-    mealtime = Session.query(Mealtime).get(meal_id)
-    if mealtime:
-        return mealtime.meals
+    meals = Session.query(Meal).get(meal_id)
+    if meals:
+        return meals
     else:
         return []
+
+@app.get("/meal")
+def get_meals():
+    Session = SessionLocal()
+    meals = Session.query(Meal).all()
+    return meals
 
 # Создание нового календаря
 @app.post("/calendar")
@@ -105,7 +111,17 @@ def create_mealtime(calendar_id: int, mealtime_name: str):
     return mealtime
 
 # Создание нового приема пищи для указанного времени приема пищи
+
 @app.post("/mealtime/{mealtime_id}/meal")
+def create_meal(mealtime_id: int, meal_name: str, grams: int, pieces: int):
+    Session = SessionLocal()
+    meal = Meal(mealtime_id=mealtime_id, meal_name=meal_name, grams=grams, pieces=pieces)
+    Session.add(meal)
+    Session.commit()
+    Session.refresh(meal)
+    return meal
+
+@app.post("/meal")
 def create_meal(mealtime_id: int, meal_name: str, grams: int, pieces: int):
     Session = SessionLocal()
     meal = Meal(mealtime_id=mealtime_id, meal_name=meal_name, grams=grams, pieces=pieces)

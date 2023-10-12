@@ -15,8 +15,10 @@ interface MealTimesItem {
 }
 
 type FieldType = {
-  meal?: string;
-  grams?: number;
+  mealtime_id: number;
+  meal_name: string;
+  grams: number;
+  pieces: number;
 };
 
 function WeekListComponent() {
@@ -24,12 +26,16 @@ function WeekListComponent() {
   const [currentWeekData, setCurrentWeekData] = useState<CalendarItem[]>([]);
   const [mealTimes, setMealTimes] = useState<MealTimesItem[]>([]);
   const [meals, setMeals] = useState<FieldType[]>([]);
+  // const [mealsid, setMealsId] = useState<FieldType[]>([]);
+  const [getMeals, setGetMeals] = useState<FieldType[]>([]);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [form] = Form.useForm();
+  const [selectedMealId, setSelectedMealId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchData();
+    fetchMealsGet();
   }, []);
 
   // Получение данных
@@ -58,8 +64,18 @@ function WeekListComponent() {
         `http://127.0.0.1:8000/calendar/${date}/mealtime`
       );
       setMealTimes(response.data);
-      // fetchMeals(response.data[0].id);
-      //! console.log(response.data)
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchMealsGet = async () => {
+    try {
+      const response = await axios.get<FieldType[]>(
+        `http://127.0.0.1:8000/meal`
+      );
+      console.log(response.data);
+      setGetMeals(response.data);
     } catch (error) {
       console.error(error);
     }
@@ -67,18 +83,30 @@ function WeekListComponent() {
 
   // Отправление данных на сервер
 
-  const fetchMeals = async (date: number) => {
+  const fetchMeals = async (a: any, b:any) => {
     try {
       const response = await axios.post<FieldType[]>(
-        `http://127.0.0.1:8000/mealtime/${date}/meal`
+        `http://127.0.0.1:8000/meal`,
+        {
+          mealtime_id: a,
+          meal_name: b.meal_name,
+          grams: b.grams,
+          pieces: b.pieces,
+        }
       );
-      setMeals(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error(error);
+      console.log({
+        mealtime_id: a,
+        meal_name: b.meal_name,
+        grams: b.grams,
+        pieces: b.pieces,
+      })
     }
   };
 
-  // 
+  //
 
   const getWeekDates = (currentDate: Date): string[] => {
     const weekDates: string[] = [];
@@ -116,16 +144,21 @@ function WeekListComponent() {
   };
 
   //место для modal
-  const showModal = (n: any) => {
-    console.log(n)
+  const showModal = (mealId: any) => {
+    setSelectedMealId(mealId);
     setIsModalOpen(true);
   };
 
   const handleOk = () => {
+    console.log("Selected Meal ID:", selectedMealId);
+    console.log(form + "1")
     form
       .validateFields()
       .then((values) => {
         form.resetFields();
+        console.log(values + "1")
+        // setMealsId(values);
+        fetchMeals(selectedMealId, values);
         setIsModalOpen(false);
         console.log("Success:", values);
       })
@@ -186,13 +219,11 @@ function WeekListComponent() {
                   style={{ margin: "10px 0" }}
                 >
                   Добавить блюдо
-                  {/* {console.log(meal.id)} */}
-                  {/* {console.log(meal.mealtime_name)} */}
                 </Button>
                 <Modal
                   title="Добавить блюдо"
                   open={isModalOpen}
-                  onOk={handleOk}
+                  onOk={() => handleOk()}
                   onCancel={handleCancel}
                 >
                   <Form
@@ -208,7 +239,7 @@ function WeekListComponent() {
                   >
                     <Form.Item<FieldType>
                       label="Блюдо"
-                      name="meal"
+                      name="meal_name"
                       rules={[
                         {
                           required: true,
@@ -224,7 +255,20 @@ function WeekListComponent() {
                       name="grams"
                       rules={[
                         {
-                          required: true,
+                          required: false,
+                          message: "Пожалуйста, добавьте количество грамм!",
+                        },
+                      ]}
+                    >
+                      <InputNumber min={0} max={5000} />
+                    </Form.Item>
+
+                    <Form.Item<FieldType>
+                      label="Кол-во"
+                      name="pieces"
+                      rules={[
+                        {
+                          required: false,
                           message: "Пожалуйста, добавьте количество грамм!",
                         },
                       ]}
