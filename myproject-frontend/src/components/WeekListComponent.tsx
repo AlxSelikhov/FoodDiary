@@ -15,10 +15,18 @@ interface MealTimesItem {
 }
 
 type FieldType = {
-  mealtime_id: number;
-  meal_name: string;
-  grams: number;
-  pieces: number;
+  id?: number;
+  mealtime_id?: number;
+  meal_name?: string;
+  grams?: number;
+  pieces?: number;
+};
+
+const datatest = {
+  mealtime_id: 1,
+  meal_name: "fgfg",
+  grams: 1,
+  pieces: 2,
 };
 
 function WeekListComponent() {
@@ -31,11 +39,16 @@ function WeekListComponent() {
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [form] = Form.useForm();
+
+  // для отправки данных в таблицу Meal
   const [selectedMealId, setSelectedMealId] = useState<number | null>(null);
+  const [selectedMealName, setSelectedMealName] = useState<string | null>(null);
+  const [selectedGrams, setSelectedMealGrams] = useState<number | null>(null);
+  const [selectedPieces, setSelectedMealPieces] = useState<number | null>(null);
 
   useEffect(() => {
     fetchData();
-    fetchMealsGet();
+    // fetchMealsGet();
   }, []);
 
   // Получение данных
@@ -48,7 +61,7 @@ function WeekListComponent() {
       setCalendarData(response.data);
       const currentDate = new Date();
       const currentWeekDates = getWeekDates(currentDate);
-      const currentWeekData = response.data.filter((item) =>
+      const currentWeekData = response.data.filter((item: any) =>
         currentWeekDates.includes(item.calendar_name)
       );
       setCurrentWeekData(currentWeekData);
@@ -69,40 +82,40 @@ function WeekListComponent() {
     }
   };
 
-  const fetchMealsGet = async () => {
-    try {
-      const response = await axios.get<FieldType[]>(
-        `http://127.0.0.1:8000/meal`
-      );
-      console.log(response.data);
-      setGetMeals(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // const fetchMealsGet = async () => {
+  //   try {
+  //     const response = await axios.get<FieldType[]>(
+  //       `http://127.0.0.1:8000/meal`
+  //     );
+  // console.log(response.data);
+  //     setGetMeals(response.data);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   // Отправление данных на сервер
 
-  const fetchMeals = async (a: any, b:any) => {
+  const fetchMeals = async () => {
     try {
       const response = await axios.post<FieldType[]>(
-        `http://127.0.0.1:8000/meal`,
+        "http://127.0.0.1:8000/meal",
         {
-          mealtime_id: a,
-          meal_name: b.meal_name,
-          grams: b.grams,
-          pieces: b.pieces,
+          mealtime_id: 1,
+          meal_name: "awdaw",
+          grams: 2,
+          pieces: 2,
         }
       );
       console.log(response.data);
     } catch (error) {
       console.error(error);
-      console.log({
-        mealtime_id: a,
-        meal_name: b.meal_name,
-        grams: b.grams,
-        pieces: b.pieces,
-      })
+      // console.log({
+      //   mealtime_id: 1,
+      //   meal_name: "awdaw",
+      //   grams: 2,
+      //   pieces: 2,
+      // });
     }
   };
 
@@ -151,12 +164,13 @@ function WeekListComponent() {
 
   const handleOk = () => {
     console.log("Selected Meal ID:", selectedMealId);
-    console.log(form + "1")
     form
       .validateFields()
       .then((values) => {
         form.resetFields();
-        console.log(values + "1")
+        setSelectedMealName(values.meal_name);
+        setSelectedMealGrams(values.grams);
+        setSelectedMealPieces(values.pieces);
         // setMealsId(values);
         fetchMeals(selectedMealId, values);
         setIsModalOpen(false);

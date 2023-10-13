@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from fastapi import HTTPException
+from pydantic import BaseModel
 
 from api.connection import DATABASE_URL
 from api.models import Calendar, Mealtime, Meal
@@ -121,11 +123,56 @@ def create_meal(mealtime_id: int, meal_name: str, grams: int, pieces: int):
     Session.refresh(meal)
     return meal
 
+# @app.post("/meal")
+# def create_meal(mealtime_id: int, meal_name: str, grams: int, pieces: int):
+#         Session = SessionLocal()
+#         meal = Meal(mealtime_id=mealtime_id, meal_name=meal_name, grams=grams, pieces=pieces)
+#         Session.add(meal)
+#         Session.commit()
+#         Session.refresh(meal)
+#         return {"message": "Meal created successfully", "meal_id": meal.id}
+
+
+
+class MealCreate(BaseModel):
+    mealtime_id: int
+    meal_name: str
+    grams: int
+    pieces: int
+
 @app.post("/meal")
-def create_meal(mealtime_id: int, meal_name: str, grams: int, pieces: int):
+def create_meal(meal: MealCreate):
     Session = SessionLocal()
-    meal = Meal(mealtime_id=mealtime_id, meal_name=meal_name, grams=grams, pieces=pieces)
-    Session.add(meal)
+    meal_db = Meal(
+        mealtime_id=meal.mealtime_id,
+        meal_name=meal.meal_name,
+        grams=meal.grams,
+        pieces=meal.pieces
+    )
+    Session.add(meal_db)
     Session.commit()
-    Session.refresh(meal)
-    return meal
+    Session.refresh(meal_db)
+    return {"message": "Meal created successfully", "meal_id": meal_db.id}
+    
+    
+# from pydantic import BaseModel
+
+# class MealCreate(BaseModel):
+#     mealtime_id: int
+#     meal_name: str
+#     grams: int
+#     pieces: int
+
+# @app.post("/meal/")
+# def create_meal(meal: MealCreate):
+#     db = SessionLocal()
+#     db_meal = Meal(
+#         mealtime_id=meal.mealtime_id,
+#         meal_name=meal.meal_name,
+#         grams=meal.grams,
+#         pieces=meal.pieces
+#     )
+#     db.add(db_meal)
+#     db.commit()
+#     db.refresh(db_meal)
+#     return {"message": "Meal created successfully", "meal_id": db_meal.id}
