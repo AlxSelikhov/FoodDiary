@@ -15,40 +15,27 @@ interface MealTimesItem {
 }
 
 type FieldType = {
-  id?: number;
   mealtime_id?: number;
   meal_name?: string;
   grams?: number;
   pieces?: number;
 };
 
-const datatest = {
-  mealtime_id: 1,
-  meal_name: "fgfg",
-  grams: 1,
-  pieces: 2,
-};
-
 function WeekListComponent() {
   const [calendarData, setCalendarData] = useState<CalendarItem[]>([]);
   const [currentWeekData, setCurrentWeekData] = useState<CalendarItem[]>([]);
   const [mealTimes, setMealTimes] = useState<MealTimesItem[]>([]);
-  const [meals, setMeals] = useState<FieldType[]>([]);
-  // const [mealsid, setMealsId] = useState<FieldType[]>([]);
-  const [getMeals, setGetMeals] = useState<FieldType[]>([]);
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [form] = Form.useForm();
 
   // для отправки данных в таблицу Meal
   const [selectedMealId, setSelectedMealId] = useState<number | null>(null);
-  const [selectedMealName, setSelectedMealName] = useState<string | null>(null);
-  const [selectedGrams, setSelectedMealGrams] = useState<number | null>(null);
-  const [selectedPieces, setSelectedMealPieces] = useState<number | null>(null);
+  const [getMeal, setGetMeal] = useState<number | null>(null);
 
   useEffect(() => {
     fetchData();
-    // fetchMealsGet();
+    fetchGetMeal();
   }, []);
 
   // Получение данных
@@ -66,6 +53,7 @@ function WeekListComponent() {
       );
       setCurrentWeekData(currentWeekData);
       fetchMealTimes(currentWeekData[0].id);
+      console.log(currentWeekData[0].id);
     } catch (error) {
       console.error(error);
     }
@@ -82,40 +70,39 @@ function WeekListComponent() {
     }
   };
 
-  // const fetchMealsGet = async () => {
-  //   try {
-  //     const response = await axios.get<FieldType[]>(
-  //       `http://127.0.0.1:8000/meal`
-  //     );
-  // console.log(response.data);
-  //     setGetMeals(response.data);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
+  const fetchGetMeal = async () => {
+    try {
+      const response = await axios.get<FieldType[]>(
+        `http://127.0.0.1:8000/meal`
+      );
+      setGetMeal(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   // Отправление данных на сервер
 
-  const fetchMeals = async () => {
+  const fetchMeals = async (mealtime_id: any, meal: any) => {
     try {
       const response = await axios.post<FieldType[]>(
         "http://127.0.0.1:8000/meal",
         {
-          mealtime_id: 1,
-          meal_name: "awdaw",
-          grams: 2,
-          pieces: 2,
+          mealtime_id: mealtime_id,
+          meal_name: meal.meal_name,
+          grams: meal.grams,
+          pieces: meal.pieces,
         }
       );
       console.log(response.data);
     } catch (error) {
       console.error(error);
-      // console.log({
-      //   mealtime_id: 1,
-      //   meal_name: "awdaw",
-      //   grams: 2,
-      //   pieces: 2,
-      // });
+      console.log({
+        mealtime_id: mealtime_id,
+        meal_name: meal.meal_name,
+        grams: meal.grams,
+        pieces: meal.pieces,
+      });
     }
   };
 
@@ -168,10 +155,6 @@ function WeekListComponent() {
       .validateFields()
       .then((values) => {
         form.resetFields();
-        setSelectedMealName(values.meal_name);
-        setSelectedMealGrams(values.grams);
-        setSelectedMealPieces(values.pieces);
-        // setMealsId(values);
         fetchMeals(selectedMealId, values);
         setIsModalOpen(false);
         console.log("Success:", values);
@@ -194,8 +177,6 @@ function WeekListComponent() {
   const onFinishFailed = (errorInfo: any) => {
     console.log("Failed:", errorInfo);
   };
-
-  //! console.log(currentWeekData)
 
   return (
     <>
@@ -227,6 +208,13 @@ function WeekListComponent() {
             {currentWeekData.some((item) => item.id === meal.calendar_id) && (
               <div>
                 <p style={{ fontWeight: "bold" }}>{meal.mealtime_name}</p>
+                {getMeal
+                  .filter((mealItem) => mealItem.mealtime_id === meal.id) // Фильтруем по mealtime_id
+                  .map((mealItem) => (
+                    <div key={mealItem.id}>
+                      <p>{mealItem.meal_name}</p>
+                    </div>
+                  ))}
                 <Button
                   type="primary"
                   onClick={() => showModal(meal.id)} // Передаем meal.id в качестве аргумента
@@ -234,6 +222,7 @@ function WeekListComponent() {
                 >
                   Добавить блюдо
                 </Button>
+
                 <Modal
                   title="Добавить блюдо"
                   open={isModalOpen}
