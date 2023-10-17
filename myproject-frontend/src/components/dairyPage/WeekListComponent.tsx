@@ -31,7 +31,7 @@ function WeekListComponent() {
 
   // для отправки данных в таблицу Meal
   const [selectedMealId, setSelectedMealId] = useState<number | null>(null);
-  const [getMeal, setGetMeal] = useState<number | null>(null);
+  const [meals, setMeals] = useState<number | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -53,7 +53,6 @@ function WeekListComponent() {
       );
       setCurrentWeekData(currentWeekData);
       fetchMealTimes(currentWeekData[0].id);
-      console.log(currentWeekData[0].id);
     } catch (error) {
       console.error(error);
     }
@@ -75,7 +74,7 @@ function WeekListComponent() {
       const response = await axios.get<FieldType[]>(
         `http://127.0.0.1:8000/meal`
       );
-      setGetMeal(response.data);
+      setMeals(response.data);
     } catch (error) {
       console.error(error);
     }
@@ -208,7 +207,7 @@ function WeekListComponent() {
             {currentWeekData.some((item) => item.id === meal.calendar_id) && (
               <div>
                 <p style={{ fontWeight: "bold" }}>{meal.mealtime_name}</p>
-                {getMeal
+                {meals
                   .filter((mealItem) => mealItem.mealtime_id === meal.id) // Фильтруем по mealtime_id
                   .map((mealItem) => (
                     <div key={mealItem.id}>

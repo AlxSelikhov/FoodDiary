@@ -1,0 +1,13 @@
+/* Установка базового шрифта и цвета текста */
+body {
+  margin: 0px;
+  padding: 0px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  color: #333;
+}
+
+/* Установка отступов и отступов от краев страницы */
+.container {
+  background-color: #f2f2f2;
+}

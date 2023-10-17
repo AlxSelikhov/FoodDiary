@@ -1,0 +1,24 @@
+.leftCorner {
+  margin-left: auto;
+}
+
+.loginButton {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.link {
+  margin: 0 10px;
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
